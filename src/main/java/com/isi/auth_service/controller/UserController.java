@@ -1,10 +1,11 @@
 package com.isi.auth_service.controller;
 
+import com.isi.auth_service.controller.dto.AuthenticationRequest;
+import com.isi.auth_service.controller.dto.RegisterRequest;
 import com.isi.auth_service.entity.User;
 import com.isi.auth_service.service.UserService;
-import configuration.JwtUtil;
+import com.isi.auth_service.service.JwtUtil;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,9 +18,9 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtTokenUtil= new JwtUtil() ;
+    private final JwtUtil jwtTokenUtil;
 
-    @PostMapping(value = "/authenticate")
+    @PostMapping(value = "/auth/authenticate")
     public ResponseEntity<String> authenticateUser(
             @Valid @RequestBody AuthenticationRequest request
     ) {
@@ -40,5 +41,17 @@ public class UserController {
         }
 
         return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping(value = "/auth/register")
+    public ResponseEntity<User> registerUser(
+            @Valid @RequestBody RegisterRequest  request
+    ) {
+        User user= new User();
+        user.setRole("admin");
+        user.setPassword(request.getPassword());
+        user.setEmail(request.getEmail());
+         userService.save(user);
+        return ResponseEntity.ok(user);
     }
 }

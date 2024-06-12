@@ -1,4 +1,4 @@
-package configuration;
+package com.isi.auth_service.service;
 
 import java.util.*;
 
@@ -13,11 +13,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-
 public class JwtUtil {
-    public JwtUtil() {
-    }
-        Algorithm algorithm = Algorithm.HMAC256("baeldung");
+    final  Algorithm algorithm = Algorithm.HMAC256("baeldung");
+
+
         public  boolean validate(String token){
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer("Baeldung")

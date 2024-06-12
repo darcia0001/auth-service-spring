@@ -1,4 +1,4 @@
-package com.isi.auth_service.controller;
+package com.isi.auth_service.controller.dto;
 
 public class AuthenticationRequest {
 
@@ -12,11 +12,11 @@ public class AuthenticationRequest {
     String email;
     String password;
 
-    String getEmail(){
+    public String getEmail(){
         return  this.email;
     }
 
-    String getPassword(){
+    public String getPassword(){
         return this.password;
     }
 }
