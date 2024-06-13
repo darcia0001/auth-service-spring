@@ -3,51 +3,63 @@ package configuration;
 import com.auth0.jwt.interfaces.Claim;
 import com.isi.auth_service.service.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.io.Console;
 import java.util.Map;
 
-//@RefreshScope
-@RefreshScope
-@Component
+@Service
+//@AllArgsConstructor
 public class AuthenticationFilter implements GatewayFilter {
 
 
-    @Autowired
+   // @Autowired
     private RouterValidator routerValidator;
-    @Autowired
+   // @Autowired
     private JwtUtil jwtUtil;
 
-    @Value("${jwt.prefix}")
+   // @Value("${jwt.prefix}")
     public String TOKEN_PREFIX;
 
-    public static class Config {
-        // Configuration properties if needed
+    @Autowired
+    public AuthenticationFilter(RouterValidator routerValidator, JwtUtil  jwtUtil, @Value("${jwt.prefix}") String TOKEN_PREFIX) {
+        this.routerValidator = routerValidator;
+        this.jwtUtil = jwtUtil;
+        this.TOKEN_PREFIX=TOKEN_PREFIX;
     }
+
+
 
 
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+       System.out.println("filter called here 1 ========================>");
         ServerHttpRequest request = exchange.getRequest();
 
         if (routerValidator.isSecured.test(request)) {
+            System.out.println("filter called here 1 ========================> isSecured yes" );
             if (this.isAuthMissing(request) || this.isPrefixMissing(request))
                 return this.onError(exchange, "Authorization header is missing in request", HttpStatus.UNAUTHORIZED);
 
             final String token = this.getAuthHeader(request);
+            System.out.println("filter called here 1 ========================> token:" + token);
 
-            if (jwtUtil.validate(token))
+            if (!jwtUtil.validate(token)){
+
                 return this.onError(exchange, "Authorization header is invalid", HttpStatus.UNAUTHORIZED);
+
+            }
+            System.out.println("filter called here 1 ========================> token valide:" + jwtUtil.validate(token));
+
 
             this.populateRequestWithHeaders(exchange, token);
         }
@@ -55,6 +67,7 @@ public class AuthenticationFilter implements GatewayFilter {
     }
 
 /*
+// abstracg gateway filter implkementatio version 4
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
@@ -98,6 +111,7 @@ public class AuthenticationFilter implements GatewayFilter {
 
     private void populateRequestWithHeaders(ServerWebExchange exchange, String token) {
         Map<String, Claim> claims = jwtUtil.getClaims(token);
+        System.out.println("filter called here 2 ========================> populateRequestWithHeaders:" + String.valueOf(claims.get("email")));
         exchange.getRequest().mutate()
                 .header("email", String.valueOf(claims.get("email")))
                 .header("id", String.valueOf(claims.get("id")))

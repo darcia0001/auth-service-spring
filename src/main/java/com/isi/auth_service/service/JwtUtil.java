@@ -19,14 +19,23 @@ public class JwtUtil {
 
         public  boolean validate(String token){
             JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("Baeldung")
+                    .withIssuer("ISI")
                     .build();
-            DecodedJWT decodedJWT = verifier.verify(token);
-            if (decodedJWT!=null){
-                return  true;
-            }else{
+
+            try{
+                DecodedJWT decodedJWT = verifier.verify(token);
+                System.out.println("decodedJWT--->"+decodedJWT);
+                if (decodedJWT!=null){
+                    return  true;
+                }else{
+                    return  false;
+                }
+
+            }catch (Exception e){
                 return  false;
             }
+
+
 
 
         }
